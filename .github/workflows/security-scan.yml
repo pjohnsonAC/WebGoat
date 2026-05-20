@@ -2,6 +2,11 @@ name: Security Scan
 
 on:
   workflow_dispatch:
+    inputs:
+      run_dependency_check:
+        description: "Run OWASP Dependency-Check. This can take a long time on first run."
+        required: false
+        default: "false"
   push:
     branches: [main]
   pull_request:
@@ -31,6 +36,8 @@ jobs:
           echo "$PWD/.tools" >> "$GITHUB_PATH"
 
       - name: Run scanners
+        env:
+          RUN_DEPENDENCY_CHECK: ${{ github.event_name == 'workflow_dispatch' && inputs.run_dependency_check || 'false' }}
         run: bash scripts/security-scan.sh
 
       - name: Upload SARIF to GitHub Code Scanning
